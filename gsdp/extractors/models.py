@@ -6,6 +6,7 @@ from keras.applications.vgg16 import VGG16
 from keras.applications.resnet50 import ResNet50
 from keras.applications.xception import Xception
 from keras.applications.inception_v3 import InceptionV3
+import tensorflow as tf
 
 import os
 
@@ -17,7 +18,7 @@ DEFAULT_SHAPES = {'VGG16': (224, 224, 3), 'ResNet50': (224, 224, 3), 'Xception':
 
 
 def pre_trained_model(model_name, weights='imagenet', input_shape=None, classes=1000,
-                      include_top=True, pooling=None, verbose=True):
+                      include_top=True, pooling=None, verbose=True, model_file =None):
     '''
     Create Keras pre-trained model.
     :param model_name: Keras pre-trained model name
@@ -50,12 +51,27 @@ def pre_trained_model(model_name, weights='imagenet', input_shape=None, classes=
                 if weights == 'imagenet':
                             model = ResNet50(weights='imagenet')
                 else:
-                            model = ResNet50(include_top=include_top,
-                                             weights=None,
-                                             input_tensor=None,
-                                             input_shape=input_shape,  # default: (224, 224, 3)
-                                             pooling=pooling,
-                                             classes=classes)
+                            if tf.__version__ == '1.1.0':
+                                model = ResNet50(include_top=include_top,
+                                                 weights=None,
+                                                 input_tensor=None,
+                                                 input_shape=input_shape,  # default: (224, 224, 3)
+                                                 pooling=pooling,
+                                                 classes=classes)
+                            else:
+                                #  load json and create model
+                                #print("="*200)
+                                #print(model_file)
+                                if os.path.isfile(model_file):
+                                    json_file = open(model_file, 'r')
+                                    loaded_model_json = json_file.read()
+                                    json_file.close()
+                                    model = model_from_json(loaded_model_json)
+                                    if verbose:
+                                        print("Model loaded from {}".format(model_file))
+
+                                else:
+                                    raise Exception("File  %s don't exist!!!! " % model_file)
         if model_name == 'Xception':
             model = Xception(include_top=include_top,
                              weights=None,

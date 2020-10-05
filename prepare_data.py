@@ -3,7 +3,7 @@ import os
 import wget
 
 # init  -----------------------------------------------------------------------------
-_CUSTOM_MODELS = ['MNIST']
+_CUSTOM_MODELS = ['MNIST', 'CIFAR']
 _KERAS_MODELS = ['VGG16', 'ResNet50']
 prototypes_relative_path = '/data/*.h5'
 models_relative_path = '/model/*.json'
@@ -39,9 +39,10 @@ def models_resources():
     resources = []
     for model in _models:
         resources.append(model + prototypes_relative_path)
-        if model in _CUSTOM_MODELS:
+        if model in _CUSTOM_MODELS + ['ResNet50']:
             resources.append(model + models_relative_path)
             resources.append(model + weights_relative_path)
+    print(resources)
     return resources
 
 # MAIN

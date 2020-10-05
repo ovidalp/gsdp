@@ -33,8 +33,13 @@ class SimpleExtractor(Extractor):
                 img = self._input_preprocessing(img, from_path=from_path)
 
             # get the predicted probabilities for each class
-            yhat = self.model.predict_classes(img, verbose=verbose)
-            return yhat[0]
+            prob = self.model.predict_proba(img, verbose=verbose)[0]
+
+            #if prob.shape[-1] > 1:
+            category_index = prob.argmax(axis=-1)  #category_index= self.model.predict_classes(img, verbose=verbose)[0]
+            probability = prob.max(axis=-1)
+
+            return category_index, probability
 # ------------------------------------------------------------------------------------------------
 #  END  Simple extractor
 # ------------------------------------------------------------------------------------------------
@@ -54,7 +59,7 @@ class ImageNetExtractor(Extractor):
             super(ImageNetExtractor, self).__init__(config)
     # ---------------------------------------------------------------------------------------------
 
-    def top1_highest_prediction(self, img, from_path=False, processed_img=False, verbose=False):
+    def top1_highest_prediction(self, img, from_path=False, processed_img=False, verbose=False, proba = False):
             '''
             Top1 Category prediction
             :param img: PIL image or image path
@@ -64,15 +69,17 @@ class ImageNetExtractor(Extractor):
             :return: Category prediction
             '''
             if processed_img is False:
-                img = self._input_preprocessing(img, from_path=from_path,verbose=verbose)
+                img = self._input_preprocessing(img, from_path=from_path)
             # get the predicted probabilities for each class
             yhat = self.model.predict(img, verbose=verbose)
+            #print(yhat)
             # retrieve the most likely result, e.g. highest probability
-            label = decode_predictions(yhat, top=1)
-            label = label[0][0]
-            category_index = synset_to_id(label[0])
+            pred = decode_predictions(yhat, top=1)
+            inID, label, prob = pred[0][0]
+            category_index = synset_to_id(inID)
+            #print('%s %s %s (%.2f%%)' % (inID, str(category_index), label, prob * 100))
             if verbose:
-                print('%s %s (%.2f%%)' % (str(category_index), label[1], label[2] * 100))
-            return category_index
+                print('%s %s %s (%.2f%%)' % (inID, str(category_index), label, prob * 100))
+            return category_index, prob
     # ------------------------------------------------------------------------------------------------
 #  END  ImageNet extractor

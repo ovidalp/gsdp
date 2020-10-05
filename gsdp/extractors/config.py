@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from keras import backend as K
-
+import tensorflow as tf
 # Globals Variable
 NOT_PRE_TRAINED_KERAS_MODELS = ["MNIST","CIFAR","CIFAR100","VGG_CIFAR10","VGG_CIFAR100"]
 
@@ -69,7 +69,7 @@ class ExtractorConfig(object):
 
     @property
     def model_file(self):
-        return self._model_file
+        return os.path.join(self._model_path, 'model', self._model_file) #self._model_file
 
     @property
     def num_classes(self):
@@ -77,7 +77,7 @@ class ExtractorConfig(object):
 
     @property
     def model_weights(self):
-        return self._weight_file
+        return os.path.join(self._model_path, 'model', self._weight_file)  #self._weight_file
 
     @property
     def models_root(self):
@@ -153,7 +153,11 @@ class ExtractorConfig(object):
         '''
          :return: return prototypes dataset path
         '''
-        return self._prototypes_file
+        return os.path.join(self._dataset_path, self._prototypes_file)
+
+
+
+
 
     #       ------------   Class Setters   --------
 
@@ -206,11 +210,11 @@ class ExtractorConfig(object):
         if os.path.exists(root_path):
             self._models_root = root_path
             self._model_path = os.path.join(self._models_root, self._model_name)
-            self._model_file = os.path.join(self._model_path, 'model', self._model_file)
-            self._weight_file = os.path.join(self._model_path, 'model', self._weight_file)
+           # self._model_file = os.path.join(self._model_path, 'model', self._model_file)
+            #self._weight_file = os.path.join(self._model_path, 'model', self._weight_file)
             self._output_path = os.path.join(self._model_path, 'out')
             self._dataset_path = os.path.join(self._model_path, 'data')
-            self._prototypes_file = os.path.join(self._dataset_path, 'prototypes.h5')
+            self._prototypes_file = 'prototypes.h5'
         else:
             raise Exception("Dir  %s don't exist!!!! " % root_path)
 
@@ -275,8 +279,10 @@ class ExtractorConfig(object):
             if name == "ResNet50":
                 #  feature_len
                 self._features_len = 2048
+                #
+                # self._features_name "flatten_1" if tf.__version__=='1.1.0' else "avg_pool"
                 self._features_name = "flatten_1"
-                self.keras_weights = True
+                self.keras_weights = tf.__version__=='1.1.0'
 
             if name == "Xception":
                 self.input_shape = (299, 299, 3)

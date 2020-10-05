@@ -84,6 +84,19 @@ def dimensionality_reduction(features, aux_matrix_dim=None, scale=None,
         #  unitary_descriptor plot size
         size = 3
 
+    # 512 features (CIFAR features)
+    if len(features) == 512:
+        # reshape input feature
+        features = np.reshape(features, (16, 32))
+        # r-dimension of auxiliary matrix (X_r_x_r)
+        aux_matrix_dim = 8 if aux_matrix_dim is None else aux_matrix_dim
+        # if plotting : set maximum activation value
+        if scale is None:
+            scale = 2 if aux_matrix_dim == 4 else 12
+        # unitary_descriptor plot size
+        size = 3
+
+
     # 2048 features (Example: ResNet50 features) and 4096 features (Example: VGG16 features)
     if len(features) == 2048 or len(features) == 4096:
         # reshape input feature
@@ -334,7 +347,7 @@ def compute_plot_signature(model, features, category_i, aux_matrix_dim=None, sav
 
 def global_prototype_descriptor(model, category_i, file_prototypes,
                                 category=True, plotting=True,
-                                plot_ceil=True, save_file=None):
+                                plot_ceil=True, save_file=None,aux_matrix_dim=None):
     '''
     Return the signature of  i-th category prototype
     :param model: Keras classification model
@@ -353,13 +366,13 @@ def global_prototype_descriptor(model, category_i, file_prototypes,
 
     save_file_semantic = save_file + '_semantic' if save_file else save_file
     semantic_signature = compute_plot_signature(model, prototype_mean, class_i, plotting=plotting,
-                                                plot_ceil=plot_ceil, save_file=save_file_semantic)
+                                                plot_ceil=plot_ceil, save_file=save_file_semantic,aux_matrix_dim=None)
     if category:  # category descriptor
             prototype_std = f_prototype['std'][class_i]
             save_file_diff = save_file + '_difference' if save_file else save_file
             boundary_signature = compute_plot_signature(model, prototype_std, class_i, plotting=plotting,
                                                         plot_ceil=plot_ceil, semantic=False, save_file=save_file_diff,
-                                                        plot_color='m')
+                                                        plot_color='m',aux_matrix_dim=None)
     else:        # prototype_descriptor
         boundary_signature = np.full(semantic_signature.shape, 0)
     f_prototype.close()
@@ -371,16 +384,16 @@ def global_prototype_descriptor(model, category_i, file_prototypes,
 #            
 # --------------------------------------------------------------------------------------------------
 def global_features_descriptor(model, features, class_i, prototype_dif, extended=False,
-                               plotting=False, plot_ceil=True, aspect_ratio=(10, 5), save_file=None):
+                               plotting=False, plot_ceil=True, aspect_ratio=(10, 5), save_file=None, aux_matrix_dim=None):
 
     save_file_semantic = save_file + '_semantic' if save_file else save_file
     semantic_meaning = compute_plot_signature(model, features, class_i, plotting=plotting,
-                                              plot_ceil=plot_ceil, save_file=save_file_semantic)
+                                              plot_ceil=plot_ceil, save_file=save_file_semantic,aux_matrix_dim=aux_matrix_dim)
 
     if extended:  # concatenate d_base + std(respect to category_prototype)
         save_file_diff = save_file + '_difference' if save_file else save_file
         semantic_difference = compute_plot_signature(model, prototype_dif, class_i, plotting=plotting,
-                                                     plot_ceil=plot_ceil, semantic=False, save_file=save_file_diff)
+                                                     plot_ceil=plot_ceil, semantic=False, save_file=save_file_diff, aux_matrix_dim=aux_matrix_dim)
 
         return np.concatenate((semantic_meaning, semantic_difference))
     return semantic_meaning

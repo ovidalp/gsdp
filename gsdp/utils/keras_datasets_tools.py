@@ -54,6 +54,11 @@ def load_data(config, verbose=True):
         (x_train, y_train), (x_test, y_test) = mnist.load_data()
         normalize = True
 
+    if config.model_name == 'CIFAR':
+        from keras.datasets import cifar10
+        (x_train, y_train), (x_test, y_test) = cifar10.load_data()
+        normalize = False
+
     print('-' * 100)
     print('                 LOADING DATA from ', config.model_name)
     print('-' * 100)

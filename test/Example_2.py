@@ -6,8 +6,11 @@ Use Keras MNIST Dataset
 
 # session config
 import tensorflow as tf
-from keras import backend as K
-K.set_session(tf.Session())
+# conf = tf.ConfigProto()
+# conf.gpu_options.allow_growth = True
+# tf.compat.v1.keras.backend.set_session(tf.compat.v1.Session(config=conf))
+# from tensorflow import keras.backend as K
+# K.set_session(tf.compat.v1.Session())
 
 # import gsdp utils
 from gsdp.utils.keras_datasets_tools import load_data

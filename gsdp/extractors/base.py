@@ -16,6 +16,7 @@ from ..utils.metrics import semantic_value, semantic_distance
 import os
 import numpy as np
 import h5py
+import cv2
 
 
 class Extractor(object):
@@ -106,6 +107,7 @@ class Extractor(object):
                                              self.config.model_weights,
                                              self.config.verbose)
                 else:
+                    #print("config.keras_weights", self.config.keras_weights)
                     if self.config.keras_weights:
                         self.model = pre_trained_model(self.config.model_name, verbose=self.config.verbose)
                     else:
@@ -113,7 +115,9 @@ class Extractor(object):
                                                        self.config.model_weights,
                                                        self.config.input_shape,
                                                        self.config.num_classes,
-                                                       self.config.verbose)
+                                                       self.config.verbose,
+                                                       model_file=self.config.model_file)
+                #self.model.summary()
             except Exception as inst:
                 print('Current configuration with errors.Please check.')
                 print('-'*80)
@@ -128,6 +132,7 @@ class Extractor(object):
             Base-Model features extractor object. Feature = softmax-feature.
             :return: Base-Model features extractor object
             '''
+            #print(self.config.features_name)
             f_layer = self.model.get_layer(self.config.features_name)
             self.model_extractor = Model(inputs=self.model.input,
                                          outputs=f_layer.output)
@@ -145,6 +150,9 @@ class Extractor(object):
             grayscale = True if self.config.image_channels == 1 else False
             if from_path:
                     img = load_img(img, grayscale=grayscale, target_size=self.config.input_shape_2D)
+            else:
+                    if img is not None:
+                          img = cv2.resize(img, self.config.input_shape_2D)
             # convert the PIL image to a numpy array
             # IN PIL - image is in (width, height, channel)
             # In Numpy - image is in (height, width, channel)
@@ -158,7 +166,7 @@ class Extractor(object):
             image_batch = np.expand_dims(numpy_image, axis=0)
 
             # prepare the image for the current CNN-model
-            if self.config.model_name == 'MNIST':
+            if self.config.model_name in NOT_PRE_TRAINED_KERAS_MODELS:
                 return image_batch
 
             if self.config.model_name == 'VGG16':
@@ -181,7 +189,7 @@ class Extractor(object):
             return self.model_extractor.predict(processed_image, verbose=verbose)
 
     # ------------------------------------------------------------------------------------------------
-    def feature_and_prediction(self, img, from_path=False, verbose=False):
+    def feature_and_prediction(self, img, from_path=False, verbose=False, proba = False):
             '''
 
             :param img: PIL image or path image
@@ -194,7 +202,10 @@ class Extractor(object):
             # get the feature
             feature = self.model_extractor.predict(processed_image.copy(), verbose=verbose)
             # get the predicted probabilities for each class
-            category_index = self.top1_highest_prediction(processed_image, processed_img=True, verbose=verbose)
+            category_index, probability = self.top1_highest_prediction(processed_image, processed_img=True,
+                                                          verbose=verbose)
+            if proba:
+                 return feature, category_index, probability
             return feature, category_index
 
     # ------------------------------------------------------------------------------------------------
@@ -205,7 +216,7 @@ class Extractor(object):
             :param category_idx: object category
             :return: object semantic value
             '''
-            return semantic_value(self.W[:, category_idx], features[0], self.b[category_idx])
+            return semantic_value(self.W[:, category_idx], features, self.b[category_idx])
 
     # ------------------------------------------------------------------------------------------------
     def semantic_value_img(self, img, from_path=False, verbose=False):
@@ -229,7 +240,7 @@ class Extractor(object):
             '''
 
             abstract_prototype = self.prototypes['mean'][int(category_idx)]
-            difference = np.absolute(features[0] - abstract_prototype)
+            difference = np.absolute(features - abstract_prototype)
             return semantic_distance(self.W[:, category_idx], difference)
 
     def prototypical_distance_img(self, img, from_path=False, verbose=False):

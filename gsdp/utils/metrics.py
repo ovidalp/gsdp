@@ -98,7 +98,7 @@ def semantic_distance(w, f):
     '''
     Semantic distance
     :param w: learned weight
-    :param f: feature
+    :param f: absolute feature difference
     :return: Semantic distance
     '''
     return (np.absolute(w)*f).sum()

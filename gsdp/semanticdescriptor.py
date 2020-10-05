@@ -2,6 +2,7 @@
 import gsdp.extractors.extractor as feature_model
 import gsdp.extractors.config as config
 from .tools import compute_plot_signature
+from gsdp.extractors.config import NOT_PRE_TRAINED_KERAS_MODELS
 # sys
 import os
 import numpy as np
@@ -14,8 +15,8 @@ DATASETS_PATH = os.path.join(ROOT_PATH, 'data')        # Datasets configs
 TEST_PATH = os.path.join(ROOT_PATH, 'test')            # Examples
 
 # feature config
-FEATURE_LENGTH = {'MNIST': [32, 128], 'VGG16': [256, 1024], 'ResNet50': [128, 512]}
-SQUARE_AUX_MATRIX = {'MNIST': [8, 4], 'VGG16': [16, 8], 'ResNet50': [16, 8]}
+FEATURE_LENGTH = {'MNIST': [32, 128],'CIFAR': [128, 512], 'VGG16': [256, 1024], 'ResNet50': [128, 512]}
+SQUARE_AUX_MATRIX = {'MNIST': [8, 4],'CIFAR': [8, 4], 'VGG16': [16, 8], 'ResNet50': [16, 8]}
 
 
 class GlobalSemanticDescriptor:
@@ -46,7 +47,7 @@ class GlobalSemanticDescriptor:
     # ------------------- Create Model Extractor Object
     def _model_init(self, model_name, models_path, feature_opt=1):
             ''' Input :
-                       model_name: CNN-model name supported (MNIST,VGG16)
+                       model_name: CNN-model name supported (MNIST,VGG16,ResNet50)
                        models_path: models folder
                        dataset_path: default Images dataset
                 Output:
@@ -57,10 +58,11 @@ class GlobalSemanticDescriptor:
             self._base_model = model_name
 
             # build_extractor
-            if model_name == 'MNIST':
+            if model_name in NOT_PRE_TRAINED_KERAS_MODELS:
                 model = feature_model.SimpleExtractor(config=model_config)
             else:
                 model_config.dataset_path = os.path.join(DATASETS_PATH, 'ImageNet')
+                model_config.print()
                 model = feature_model.ImageNetExtractor(config=model_config)
 
             # feature_config
@@ -96,11 +98,28 @@ class GlobalSemanticDescriptor:
             :return: img feature, difference, category index
             '''
             feature, class_idx = self.extractor.feature_and_prediction(img, from_path=from_path, verbose=verbose)
+
             difference = None
             if extended_version:
                 abstract_prototype = self.prototypes['mean'][int(class_idx)]
                 difference = np.absolute(feature[0] - abstract_prototype)
             return feature[0], difference, class_idx
+
+    # ----------------------------------------------- dimensionality reduction (fx) of high dimensional semantic description
+    def semantic_representation2signature(self,feature, difference, category_idx, extended_version=True):
+
+        semantic_meaning = compute_plot_signature(self.extractor, feature, category_idx,
+                                                  aux_matrix_dim=self.aux_matrix_dim, plotting=False)
+        #print(semantic_meaning.shape)
+        if extended_version:  # semantic_meaning + semantic_difference
+            semantic_difference = compute_plot_signature(self.extractor, difference, category_idx,
+                                                         aux_matrix_dim=self.aux_matrix_dim, plotting=False,
+                                                         semantic=False)
+            return np.concatenate((semantic_meaning, semantic_difference))
+
+        return semantic_meaning
+
+
     # ------------------------------------------------ Base Model Features Extraction
 
     def base_feature(self, img, from_path=False, verbose=True):
@@ -114,6 +133,42 @@ class GlobalSemanticDescriptor:
             return self.extractor.feature(img, from_path=from_path, verbose=verbose)[0]
     # ----------------------------------------------------   single GSDP feature extraction
 
+    def base_feature2feature(self, feature, category_idx, extended_version=True,feature_type = 1):
+            '''
+            Convert base_model feature to GSDP feature
+            :param feature: Base Model feature
+            :param category_idx: category label
+            :param extended_version: include semantic difference
+            :param verbose: logs
+            :return: GSDP feature
+            '''
+            if feature_type ==1:
+                feature = feature[0]
+
+            abstract_prototype = self.prototypes['mean'][int(category_idx)]
+            #print('abstract: ',abstract_prototype.shape)
+            #print('feature',feature.shape, 'feature_0',feature[0].shape)
+            difference = np.absolute(feature - abstract_prototype)
+            #print('difference', difference.shape)
+            return self.semantic_representation2signature(feature, difference,
+                                                           category_idx, extended_version= extended_version)
+
+            # semantic_meaning = compute_plot_signature(self.extractor, feature, category_idx,
+            #                                           aux_matrix_dim=self.aux_matrix_dim, plotting=False)
+            # difference = None
+            # if extended_version:  # semantic_meaning + semantic_difference
+            #     abstract_prototype = self.prototypes['mean'][int(category_idx)]
+            #     difference = np.absolute(feature - abstract_prototype)
+            #
+            #     semantic_difference = compute_plot_signature(self.extractor, difference, category_idx,
+            #                                                  aux_matrix_dim=self.aux_matrix_dim, plotting=False,
+            #                                                  semantic=False)
+            #     return np.concatenate((semantic_meaning, semantic_difference))
+            #
+            # return semantic_meaning
+
+    # ----------------------------------------------------   single GSDP feature extraction
+
     def feature(self, img, from_path=False, verbose=False, extended=True):
             '''
             Global Semantic feature
@@ -125,15 +180,15 @@ class GlobalSemanticDescriptor:
             '''
             feature, difference, category_idx = self._semantic_representation(img, from_path=from_path,
                                                                               verbose=verbose, extended_version=extended)
-
-            semantic_meaning = compute_plot_signature(self.extractor, feature, category_idx, aux_matrix_dim=self.aux_matrix_dim, plotting=False)
-            if extended:  # semantic_meaning + semantic_difference
-                semantic_difference = compute_plot_signature(self.extractor, difference, category_idx,
-                                                             aux_matrix_dim=self.aux_matrix_dim, plotting=False, semantic=False)
-                return np.concatenate((semantic_meaning, semantic_difference))
-
-            return semantic_meaning
-
+            #
+            # semantic_meaning = compute_plot_signature(self.extractor, feature, category_idx, aux_matrix_dim=self.aux_matrix_dim, plotting=False)
+            # if extended:  # semantic_meaning + semantic_difference
+            #     semantic_difference = compute_plot_signature(self.extractor, difference, category_idx,
+            #                                                  aux_matrix_dim=self.aux_matrix_dim, plotting=False, semantic=False)
+            #     return np.concatenate((semantic_meaning, semantic_difference))
+            #
+            # return semantic_meaning
+            return self.semantic_representation2signature(feature, difference, category_idx,extended_version=extended)
     # ---------------------------------------------------- Create Model Extractor Object
 #    def describe_category(self, ok):
 #            return True
