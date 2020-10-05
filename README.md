@@ -1,5 +1,5 @@
 # Global Semantic Descriptor based on Prototypes
-[![Version](https://img.shields.io/badge/version-1.0-brightgreen.svg)](https://www.verlab.dcc.ufmg.br/global-semantic-description)
+[![Version](https://img.shields.io/badge/version-1.1.0-brightgreen.svg)](https://www.verlab.dcc.ufmg.br/global-semantic-description)
 [![License](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
 
 # Project #
@@ -32,26 +32,25 @@ https://www.verlab.dcc.ufmg.br
 ## Citation ##
 
 If you are using GSDP descriptor for academic purposes, please cite:
-
-     Prototypicality effects in global semantic description of objects
-     Omar Vidal Pino, Erickson R. Nascimento, Mario F. M. Campos
-     IEEE Winter Conference on Applications of Computer Vision (WACV), 2019
+     
+     O. Vidal Pino, E. R. Nascimento and M. F. M. Campos, 
+     Prototypicality Effects in Global Semantic Description of Objects,
+     2019 IEEE Winter Conference on Applications of Computer Vision (WACV), 
+     Waikoloa Village, HI, USA, 2019, pp. 1233-1242, doi: 10.1109/WACV.2019.00136.
      
 ### Bibtex entry ###
 
 >@InProceedings{vidal2019wacv,  
->title = {Prototypicality effects in global semantic description of objects},  
+>title = {Prototypicality Effects in Global Semantic Description of Objects},  
 booktitle = {2019 IEEE Winter Conference on Applications of Computer Vision (WACV)},  
 >author = {Omar Vidal Pino and Erickson R. Nascimento and Mario F. M. Campos},  
 >Year = {2019},  
->Address = {Hawaii, USA},  
+>Address = {Waikoloa Village, HI, USA},  
 >month = {January},  
->intype = {to appear in},  
->pages = {},  
+>pages = {1233-1242},  
 >volume = {},  
 >number = {},  
->doi = {},  
->ISBN = {}  
+>doi = {10.1109/WACV.2019.00136}
 >}
 
      
@@ -71,7 +70,7 @@ booktitle = {2019 IEEE Winter Conference on Applications of Computer Vision (WAC
 
 Installation for Python 3 environment (Python3 and pip3 active):
 
-    git clone git://github.com/verlab/gsdp
+    git clone git@github.com:ovidalp/gsdp
     cd gsdp/
     pip install -r requirements.txt 
     python prepare_data.py
@@ -79,7 +78,7 @@ Installation for Python 3 environment (Python3 and pip3 active):
    
 Installation without Python 3 environment:
 
-    git clone git://github.com/verlab/gsdp
+    git clone git@github.com:ovidalp/gsdp
     cd gsdp/
     pip3 install -r requirements.txt 
     python3 prepare_data.py
