@@ -60,8 +60,8 @@ booktitle = {2019 IEEE Winter Conference on Applications of Computer Vision (WAC
 
 ### Dependencies ###
 
-* Keras 2.0  _(Tested with 2.0.4)_  
-* Tensorflow 1.1 _(Tested with 1.1.0)_
+* Keras 2.3  _(Tested with 2.3.1)_  
+* Tensorflow 2.1 _(Tested with 2.1.0)_
 * Matplotlib 2.0 _(Tested with 2.0.2)_  
 * H5py 2.7 _(Tested with 2.7.0)_ 
 * Pandas 0.20 _(Tested with 0.20.3)_ 
@@ -70,18 +70,18 @@ booktitle = {2019 IEEE Winter Conference on Applications of Computer Vision (WAC
 
 Installation for Python 3 environment (Python3 and pip3 active):
 
-    git clone git@github.com:ovidalp/gsdp
+    git clone git clone https://github.com/ovidalp/gsdp.git
     cd gsdp/
     pip install -r requirements.txt 
-    python prepare_data.py
+    ./prepare_data.sh
     pip install .
    
 Installation without Python 3 environment:
 
-    git clone git@github.com:ovidalp/gsdp
+    git clone git clone https://github.com/ovidalp/gsdp.git
     cd gsdp/
     pip3 install -r requirements.txt 
-    python3 prepare_data.py
+    ./prepare_data.sh
     pip3 install .
     
 Read more at [GSDP documentation](https://verlab.github.io/gsdp/).

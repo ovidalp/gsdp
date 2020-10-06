@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 # gsdp
 from gsdp import __version__
-from prepare_data import download_gsdp_data,models_resources
+from prepare_data import models_resources
 
 # setup -----------------------------------------------------------------------------
 with open("README.md", "r") as fh:
