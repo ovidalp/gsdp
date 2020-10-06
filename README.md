@@ -70,7 +70,7 @@ booktitle = {2019 IEEE Winter Conference on Applications of Computer Vision (WAC
 
 Installation for Python 3 environment (Python3 and pip3 active):
 
-    git clone git clone https://github.com/ovidalp/gsdp.git
+    git clone https://github.com/ovidalp/gsdp.git
     cd gsdp/
     pip install -r requirements.txt 
     ./prepare_data.sh
@@ -78,7 +78,7 @@ Installation for Python 3 environment (Python3 and pip3 active):
    
 Installation without Python 3 environment:
 
-    git clone git clone https://github.com/ovidalp/gsdp.git
+    git clone https://github.com/ovidalp/gsdp.git
     cd gsdp/
     pip3 install -r requirements.txt 
     ./prepare_data.sh
